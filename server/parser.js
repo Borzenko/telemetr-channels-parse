@@ -74,7 +74,8 @@ const writeChannelEntry = async (info) => {
         name: info.name,
         subscribers: info.subscribers,
         description: info.description,
-        last_invite_link: info.last_invite_link
+        last_invite_link: info.last_invite_link,
+        created_at: new Date()
       }
     }, { upsert: true })
 }

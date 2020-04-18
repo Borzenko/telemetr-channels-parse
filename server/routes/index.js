@@ -9,6 +9,7 @@ router.get('/channels', async (req, res, next) => {
   const page = req.query.page ? req.query.page : 1
   
   const items = await channelsCollection.find()
+    .sort( { created_at: -1 } )
     .skip(page > 0 ? ((page - 1) * perPage) : 0 )
     .limit(50)
     .toArray()
