@@ -30,6 +30,8 @@
 import axios from 'axios'
 import moment from 'moment'
 
+const baseUrl = process.env.VUE_APP_BACKEND_URL || 'http://localhost:3000'
+
 export default {
   name: 'App',
   data() {
@@ -63,7 +65,7 @@ export default {
   },
   methods: {
     fetch() {
-      axios.get('http://localhost:3000/api/channels', {
+      axios.get(`${baseUrl}/api/channels`, {
         params: {
           page: this.page
         } 
