@@ -105,15 +105,16 @@ const parseTelemetrPage = (htmlPage) => {
 }
 
 const parseInitial = async () => {
+
   await db.connect()
 
   let args = process.argv.slice(2);
   let pageIdx = args.length > 0 ? args[0] : 0;
 
-  startInterval(10, () => {
+  startInterval(60, () => {
     const pageUrl = getInitialUrl(pageIdx);
     console.log("\nParsing page: " + pageIdx)
-    let proxiedRequest = request.defaults({'proxy': helper.proxyUrl()});
+    let proxiedRequest = request.defaults({ 'proxy': helper.proxyUrl() });
     proxiedRequest(pageUrl).then(parseTelemetrPage)
     //request({ url: pageUrl, proxy: helper.proxyUrl() }).then(parseTelemetrPage)
     pageIdx++
@@ -127,7 +128,7 @@ const parseNew = async () => {
   startInterval(20, () => {
     const pageUrl = getUrl(pageIdx);
     console.log("\nParsing page: " + pageIdx)
-    let proxiedRequest = request.defaults({'proxy': helper.proxyUrl()});
+    let proxiedRequest = request.defaults({ 'proxy': helper.proxyUrl() });
     proxiedRequest(pageUrl).then(parseTelemetrPage)
     //request({ url: pageUrl, proxy: helper.proxyUrl() }).then(parseTelemetrPage)
     pageIdx++
