@@ -105,19 +105,6 @@ const parseTelemetrPage = (htmlPage) => {
 }
 
 const parseInitial = async () => {
-<<<<<<< HEAD
-    await db.connect()
-    
-    let args = process.argv.slice(2);
-    let pageIdx = args.length > 0 ? args[0] : 0;
-
-    startInterval(60, () => {
-        const pageUrl = getInitialUrl(pageIdx);
-        console.log("\nParsing page: " + pageIdx)
-        request(pageUrl).then(parseTelemetrPage)
-        pageIdx++
-    })
-=======
 
   await db.connect()
 
@@ -132,7 +119,6 @@ const parseInitial = async () => {
     //request({ url: pageUrl, proxy: helper.proxyUrl() }).then(parseTelemetrPage)
     pageIdx++
   })
->>>>>>> 3f7055fb73dca6ff26f5ebbb1b180a0e4deb6c22
 }
 
 const parseNew = async () => {
