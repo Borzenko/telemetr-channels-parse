@@ -37,7 +37,7 @@ module.exports = {
             user: "EPjErwx9M0",
             password: "borovenko1996"
         }
-        return "http://" + proxy.user + ":" + proxy.password + "@" + hosts[getRandomNumber(0, hosts.length)] + ":" + proxy.port
+        return "http://" + proxy.user + ":" + proxy.password + "@" + hosts[getRandomNumber(0, hosts.length-1)] + ":" + proxy.port
     }
 
 }
