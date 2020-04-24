@@ -76,19 +76,18 @@ function parseCategories(row, info) {
 const writeChannelEntry = async (info) => {
   const channels = await db.collection('channels')
   const res = await channels.findOne({ name: info.name })
-  await channels.remove({})
-  // if (!res) {
-  //   channels.insert({
-  //     channel_id: info.channel_id,
-  //     avatar_link: info.avatar_link,
-  //     name: info.name,
-  //     subscribers: info.subscribers,
-  //     description: info.description,
-  //     last_invite_link: info.last_invite_link,
-  //     created_at: new Date(),
-  //     categories: info.categories
-  //   })
-  // }
+  if (!res) {
+    channels.insert({
+      channel_id: info.channel_id,
+      avatar_link: info.avatar_link,
+      name: info.name,
+      subscribers: info.subscribers,
+      description: info.description,
+      last_invite_link: info.last_invite_link,
+      created_at: new Date(),
+      categories: info.categories
+    })
+  }
 }
 
 // $('#channels_table').find('tbody').find('tr').first().find('td')
