@@ -13,6 +13,7 @@ router.get('/channels', async (req, res, next) => {
     .skip(page > 0 ? ((page - 1) * perPage) : 0 )
     .limit(50)
     .toArray()
+    console.log('items',items)
   const total = await channelsCollection.find().count()
   res.json({
     results: items,
