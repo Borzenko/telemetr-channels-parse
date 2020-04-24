@@ -25,7 +25,7 @@ function startInterval(seconds, callback) {
 /**
  * @param {Cheerio} row
  * */
-function parseInfo(row) {
+function parseInfo(row , parseCategories) {
   let result = {}
 
   let columns = row.find('td')
@@ -59,6 +59,8 @@ function parseInfo(row) {
   let descText = htmlToText.fromString(descHtml, { wordwrap: null })
   result["description"] = descText
 
+  result["categories"] = parseCategories
+
   return result
 }
 
@@ -71,7 +73,7 @@ function parseCategories(row, info) {
   }).get()
 }
 
-const writeChannelEntry = async (info) => {
+const writeChannelEntry = async (info, categories) => {
   const channels = await db.collection('channels')
   const res = await channels.findOne({ name: info.name })
 
@@ -83,7 +85,8 @@ const writeChannelEntry = async (info) => {
       subscribers: info.subscribers,
       description: info.description,
       last_invite_link: info.last_invite_link,
-      created_at: new Date()
+      created_at: new Date(),
+      categories: info.categories //add new
     })
   }
 }
@@ -94,14 +97,15 @@ const parseTelemetrPage = (htmlPage) => {
   let columns = $('#channels_table').find('tbody').find('tr')
 
   for (let infoIdx = 0, categoryIndex = 1; infoIdx < columns.length; categoryIndex += 2, infoIdx += 2) {
-    let info = parseInfo(columns.eq(infoIdx))
-    const categories = parseCategories(columns.eq(categoryIndex))
-    console.log(categories)
-    const isExist = categories.filter(item => !blackList.includes(item))
-    console.log(isExist)
-    if (isExist.length) {
-      writeChannelEntry(info)
-    }
+    let info = parseInfo(columns.eq(infoIdx),parseCategories(columns.eq(categoryIndex)))
+    console.log('!!!!!!!!!!!!!!!', info)
+    //const categories = parseCategories(columns.eq(categoryIndex))
+    //console.log(categories)
+    //const isExist = categories.filter(item => !blackList.includes(item))
+    //console.log(isExist)
+    //if (isExist.length) {
+    writeChannelEntry(info)
+    //}
   }
 }
 
@@ -138,5 +142,3 @@ module.exports = {
   parseInitial,
   parseNew
 }
-
-
