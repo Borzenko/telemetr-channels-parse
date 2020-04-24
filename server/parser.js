@@ -4,6 +4,7 @@ const db = require('./db')
 const htmlToText = require('html-to-text');
 const blackList = require('./black-list');
 const helper = require('./helper')
+const fakeUa = require('fake-useragent');
 
 let $;
 
@@ -114,9 +115,8 @@ const parseInitial = async () => {
   startInterval(60, () => {
     const pageUrl = getInitialUrl(pageIdx);
     console.log("\nParsing page: " + pageIdx)
-    let proxiedRequest = request.defaults({ 'proxy': helper.proxyUrl() });
+    let proxiedRequest = request.defaults({ headers: { 'User-Agent': fakeUa(), 'proxy': helper.proxyUrl() } });
     proxiedRequest(pageUrl).then(parseTelemetrPage)
-    //request({ url: pageUrl, proxy: helper.proxyUrl() }).then(parseTelemetrPage)
     pageIdx++
   })
 }
@@ -128,9 +128,8 @@ const parseNew = async () => {
   startInterval(20, () => {
     const pageUrl = getUrl(pageIdx);
     console.log("\nParsing page: " + pageIdx)
-    let proxiedRequest = request.defaults({ 'proxy': helper.proxyUrl() });
+    let proxiedRequest = request.defaults({ headers: { 'User-Agent': fakeUa(), 'proxy': helper.proxyUrl() } });
     proxiedRequest(pageUrl).then(parseTelemetrPage)
-    //request({ url: pageUrl, proxy: helper.proxyUrl() }).then(parseTelemetrPage)
     pageIdx++
   })
 }
@@ -139,3 +138,5 @@ module.exports = {
   parseInitial,
   parseNew
 }
+
+
