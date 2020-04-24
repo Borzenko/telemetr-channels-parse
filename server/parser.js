@@ -73,22 +73,22 @@ function parseCategories(row, info) {
   }).get()
 }
 
-const writeChannelEntry = async (info, categories) => {
+const writeChannelEntry = async (info) => {
   const channels = await db.collection('channels')
   const res = await channels.findOne({ name: info.name })
-
-  if (!res) {
-    channels.insert({
-      channel_id: info.channel_id,
-      avatar_link: info.avatar_link,
-      name: info.name,
-      subscribers: info.subscribers,
-      description: info.description,
-      last_invite_link: info.last_invite_link,
-      created_at: new Date(),
-      categories: info.categories //add new
-    })
-  }
+  await channels.remove({})
+  // if (!res) {
+  //   channels.insert({
+  //     channel_id: info.channel_id,
+  //     avatar_link: info.avatar_link,
+  //     name: info.name,
+  //     subscribers: info.subscribers,
+  //     description: info.description,
+  //     last_invite_link: info.last_invite_link,
+  //     created_at: new Date(),
+  //     categories: info.categories
+  //   })
+  // }
 }
 
 // $('#channels_table').find('tbody').find('tr').first().find('td')
@@ -98,14 +98,7 @@ const parseTelemetrPage = (htmlPage) => {
 
   for (let infoIdx = 0, categoryIndex = 1; infoIdx < columns.length; categoryIndex += 2, infoIdx += 2) {
     let info = parseInfo(columns.eq(infoIdx),parseCategories(columns.eq(categoryIndex)))
-    console.log('!!!!!!!!!!!!!!!', info)
-    //const categories = parseCategories(columns.eq(categoryIndex))
-    //console.log(categories)
-    //const isExist = categories.filter(item => !blackList.includes(item))
-    //console.log(isExist)
-    //if (isExist.length) {
     writeChannelEntry(info)
-    //}
   }
 }
 
