@@ -1,4 +1,5 @@
 const request = require('request-promise');
+const axios = require('axios')
 const cheerio = require('cheerio');
 const db = require('./db')
 const htmlToText = require('html-to-text');
@@ -25,7 +26,7 @@ function startInterval(seconds, callback) {
 /**
  * @param {Cheerio} row
  * */
-function parseInfo(row , parseCategories) {
+function parseInfo(row , parseCategories, isFirst) {
   let result = {}
 
   let columns = row.find('td')
@@ -41,6 +42,9 @@ function parseInfo(row , parseCategories) {
   let nameRoot = columns.eq(1)
   let name = nameRoot.find('a').first().text()
   result['name'] = name
+  if(isFirst) {
+    console.log(name)
+  }
 
   let invite_link = nameRoot.find('a').first().attr('href')
   result['last_invite_link'] = invite_link
@@ -50,7 +54,11 @@ function parseInfo(row , parseCategories) {
   let subsStr = subsRoot.find('span').first().text()
   let subsStr2 = subsRoot.find('[data-do="show_dynamic_participants"]')
 
-  result["channel_id"] = parseInt(subsStr2.first().attr()['data-id'])
+  try {
+    result["channel_id"] = parseInt(subsStr2.first().attr()['data-id'])
+  } catch (err) {
+    result["channel_id"] = null
+  }
   result["subscribers"] = parseInt(subsStr.replace(/[^0-9]/g, ''))
 
   // Description
@@ -96,7 +104,7 @@ const parseTelemetrPage = (htmlPage) => {
   let columns = $('#channels_table').find('tbody').find('tr')
 
   for (let infoIdx = 0, categoryIndex = 1; infoIdx < columns.length; categoryIndex += 2, infoIdx += 2) {
-    let info = parseInfo(columns.eq(infoIdx),parseCategories(columns.eq(categoryIndex)))
+    let info = parseInfo(columns.eq(infoIdx),parseCategories(columns.eq(categoryIndex)), infoIdx === 0)
     writeChannelEntry(info)
   }
 }
@@ -108,11 +116,16 @@ const parseInitial = async () => {
   let args = process.argv.slice(2);
   let pageIdx = args.length > 0 ? args[0] : 0;
 
-  startInterval(60, () => {
+  startInterval(15, () => {
     const pageUrl = getInitialUrl(pageIdx);
-    console.log("\nParsing page: " + pageIdx)
-    let proxiedRequest = request.defaults({ headers: { 'User-Agent': fakeUa(), 'proxy': helper.proxyUrl() } });
-    proxiedRequest(pageUrl).then(parseTelemetrPage)
+    const ua = fakeUa()
+    const proxy = helper.proxyUrl()
+    const req = request.get(pageUrl, {
+      proxy: proxy,
+      headers: {
+        'User-Agent': ua,
+      }
+    }).then(parseTelemetrPage)
     pageIdx++
   })
 }
