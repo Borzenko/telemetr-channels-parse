@@ -12,7 +12,7 @@ let $;
 
 const getInitialUrl = (subs = 0) => {
   if (subs) {
-    return `https://telemetr.me/channels/?participants_to=${subs}`
+    return `https://telemetr.me/channels/?participants_from=1000&participants_to=${subs}`
   }
   return `https://telemetr.me/channels/`;
 }
@@ -108,8 +108,11 @@ const parseTelemetrPage = (htmlPage) => {
   let columns = $('#channels_table').find('tbody').find('tr')
 
   for (let infoIdx = 0, categoryIndex = 1; infoIdx < columns.length; categoryIndex += 2, infoIdx += 2) {
-    info = parseInfo(columns.eq(infoIdx),parseCategories(columns.eq(categoryIndex)), infoIdx === 0)
-    writeChannelEntry(info)
+    const data = parseInfo(columns.eq(infoIdx),parseCategories(columns.eq(categoryIndex)), infoIdx === 0)
+    if (data.subscribers) {
+      info = data
+      writeChannelEntry(info)
+    }
   }
 
   return info
@@ -136,7 +139,13 @@ const parseInitial = async () => {
       }
     })
     .then(html => parseTelemetrPage(html))
-    .then((info) => { subs = info.subscribers + 100 })
+    .then((info) => { 
+      if (info.subscribers === subs) {
+        subs = info.subscribers - 1
+      } else {
+        subs = info.subscribers
+      }
+    })
     pageIdx++
   })
 }
