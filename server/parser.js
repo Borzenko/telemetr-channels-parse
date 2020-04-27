@@ -10,8 +10,11 @@ const fakeUa = require('fake-useragent');
 let $;
 
 
-const getInitialUrl = (page) => {
-  return `https://telemetr.me/channels/?page=${page}&participants_from=1000`;
+const getInitialUrl = (subs = 0) => {
+  if (subs) {
+    return `https://telemetr.me/channels/?participants_to=${subs}`
+  }
+  return `https://telemetr.me/channels/`;
 }
 
 const getUrl = (page) => {
@@ -100,13 +103,16 @@ const writeChannelEntry = async (info) => {
 
 // $('#channels_table').find('tbody').find('tr').first().find('td')
 const parseTelemetrPage = (htmlPage) => {
+  let info;
   $ = cheerio.load(htmlPage, { decodeEntities: false })
   let columns = $('#channels_table').find('tbody').find('tr')
 
   for (let infoIdx = 0, categoryIndex = 1; infoIdx < columns.length; categoryIndex += 2, infoIdx += 2) {
-    let info = parseInfo(columns.eq(infoIdx),parseCategories(columns.eq(categoryIndex)), infoIdx === 0)
+    info = parseInfo(columns.eq(infoIdx),parseCategories(columns.eq(categoryIndex)), infoIdx === 0)
     writeChannelEntry(info)
   }
+
+  return info
 }
 
 const parseInitial = async () => {
@@ -115,9 +121,12 @@ const parseInitial = async () => {
 
   let args = process.argv.slice(2);
   let pageIdx = args.length > 0 ? args[0] : 0;
+  let subs = process.env.INITIAL_SUBS || 0
 
-  startInterval(15, () => {
-    const pageUrl = getInitialUrl(pageIdx);
+  startInterval(10, () => {
+    console.log(subs)
+    const pageUrl = getInitialUrl(subs);
+    // ?page=${page}&participants_from=1000
     const ua = fakeUa()
     const proxy = helper.proxyUrl()
     const req = request.get(pageUrl, {
@@ -125,7 +134,9 @@ const parseInitial = async () => {
       headers: {
         'User-Agent': ua,
       }
-    }).then(parseTelemetrPage)
+    })
+    .then(html => parseTelemetrPage(html))
+    .then((info) => { subs = info.subscribers + 100 })
     pageIdx++
   })
 }
