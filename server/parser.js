@@ -17,8 +17,11 @@ const getInitialUrl = (subs = 0) => {
   return `https://telemetr.me/channels/`;
 }
 
-const getUrl = (page) => {
-  return `https://telemetr.me/channels/?page=${page}&participants_from=1000&mentions_week_from=1`
+const getUrl = (subs = 0) => {
+  if (subs) {
+    return `https://telemetr.me/channels/?participants_from=1000&participants_to=${subs}&mentions_week_from=1`
+  }
+  return `https://telemetr.me/channels/?mentions_week_from=1`
 }
 
 function startInterval(seconds, callback) {
@@ -101,8 +104,39 @@ const writeChannelEntry = async (info) => {
   }
 }
 
+const updateChannelEntity = async (info) => {
+  const channels = await db.collection('channels')
+  const res = await channels.findOne({ channel_id: info.channel_id })
+  if (res) {
+    if (res.name !== info.name) {
+      return channels.insert({
+        channel_id: info.channel_id,
+        avatar_link: info.avatar_link,
+        name: info.name,
+        subscribers: info.subscribers,
+        description: info.description,
+        last_invite_link: info.last_invite_link,
+        created_at: new Date(),
+        categories: info.categories,
+        prev: res
+      })
+    }
+    return 
+  }
+  return channels.insert({
+    channel_id: info.channel_id,
+    avatar_link: info.avatar_link,
+    name: info.name,
+    subscribers: info.subscribers,
+    description: info.description,
+    last_invite_link: info.last_invite_link,
+    created_at: new Date(),
+    categories: info.categories
+  })
+}
+
 // $('#channels_table').find('tbody').find('tr').first().find('td')
-const parseTelemetrPage = (htmlPage) => {
+const parseTelemetrPage = (htmlPage, isParseNew) => {
   let info;
   $ = cheerio.load(htmlPage, { decodeEntities: false })
   let columns = $('#channels_table').find('tbody').find('tr')
@@ -111,7 +145,11 @@ const parseTelemetrPage = (htmlPage) => {
     const data = parseInfo(columns.eq(infoIdx),parseCategories(columns.eq(categoryIndex)), infoIdx === 0)
     if (data.subscribers) {
       info = data
-      writeChannelEntry(info)
+      if (isParseNew) {
+        updateChannelEntity(info)
+      } else {
+        writeChannelEntry(info)
+      }
     }
   }
 
@@ -121,13 +159,9 @@ const parseTelemetrPage = (htmlPage) => {
 const parseInitial = async () => {
 
   await db.connect()
-
-  let args = process.argv.slice(2);
-  let pageIdx = args.length > 0 ? args[0] : 0;
   let subs = process.env.INITIAL_SUBS || 0
 
-  startInterval(10, () => {
-    console.log(subs)
+  startInterval(30, () => {
     const pageUrl = getInitialUrl(subs);
     // ?page=${page}&participants_from=1000
     const ua = fakeUa()
@@ -146,20 +180,43 @@ const parseInitial = async () => {
         subs = info.subscribers
       }
     })
-    pageIdx++
+
   })
 }
 
 const parseNew = async () => {
   await db.connect()
-  let pageIdx = 1;
+  let subs = process.env.INITIAL_SUBS || 0
+  let check = false
 
-  startInterval(20, () => {
-    const pageUrl = getUrl(pageIdx);
-    console.log("\nParsing page: " + pageIdx)
-    let proxiedRequest = request.defaults({ headers: { 'User-Agent': fakeUa(), 'proxy': helper.proxyUrl() } });
-    proxiedRequest(pageUrl).then(parseTelemetrPage)
-    pageIdx++
+  const interval = startInterval(5, () => {
+    if (subs <= 1000) {
+      if (check) {
+        return clearInterval(interval);
+      } else {
+        check = true
+      }
+    }
+    const pageUrl = getUrl(subs);
+    // ?page=${page}&participants_from=1000
+    const ua = fakeUa()
+    const proxy = helper.proxyUrl()
+    
+    request.get(pageUrl, {
+      proxy: proxy,
+      headers: {
+        'User-Agent': ua,
+      }
+    })
+    .then(html => parseTelemetrPage(html, true))
+    .then((info) => { 
+      if (info.subscribers === subs) {
+        subs = info.subscribers - 1
+      } else {
+        subs = info.subscribers
+      }
+    })
+
   })
 }
 

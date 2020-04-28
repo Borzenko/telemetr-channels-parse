@@ -12,6 +12,14 @@
           <template v-slot:cell(created_at)="data">
             {{ parseDate(data.item.created_at )}}
           </template>
+          <template v-slot:cell(name)="{ item }">
+            <p style="text-decoration: line-through;" v-if="item.prev"> {{ item.prev.name }}</p>
+            {{ item.name }}
+          </template>
+          <template v-slot:cell(type)="{ item }">
+            <span v-if="item.prev">Измененный</span>
+            <span v-else>Новый</span>
+          </template>
         </b-table>
         <b-pagination
           class="mt-3"
@@ -52,6 +60,9 @@ export default {
         label: 'Время создания',
         key: 'created_at'
       }, {
+        label: 'Тип',
+        key: 'type'
+      },  {
         label: 'Кол-о подписчиков',
         key: 'subscribers'
       }],
@@ -72,6 +83,7 @@ export default {
       }).then(res => {
         this.items = res.data.results
         this.total = res.data.total 
+        console.log(this.items.filter(item => !!item.prev))
       })
     },
     parseDate(date) {
