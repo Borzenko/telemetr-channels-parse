@@ -221,7 +221,14 @@ const parseNew = async () => {
 }
 
 const parseCategory = async () => {
-  await request.get('https://telemetr.me/channels/#').then(async res => {
+  const ua = fakeUa()
+  const proxy = helper.proxyUrl()
+  await request.get('https://telemetr.me/channels/#',{
+    proxy: proxy,
+      headers: {
+        'User-Agent': ua,
+      }
+  }).then(async res => {
     const $ = cheerio.load(res);
     let data = []
     await $('.cats_long div span').each((i, elem) => {
