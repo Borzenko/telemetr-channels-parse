@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const helper = require('../helper');
+
 
 
 router.get('/channels', async (req, res, next) => {
@@ -31,11 +33,8 @@ router.get('/channels', async (req, res, next) => {
     total
   })
 });
-
-router.get('/categories', async (req, res) => {
-  const catCollection = await db.collection('categories')
-  let categ = await catCollection.findOne({})
-  return res.json(categ.categories)
+router.put('/channels', async (req, res) => {
+  helper.updateChannelCategory(req.body)
 })
 
 module.exports = router;

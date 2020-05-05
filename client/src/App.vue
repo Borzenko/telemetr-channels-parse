@@ -19,24 +19,24 @@
                 <template v-slot:cell(categories)="{ item }">
                     <div v-for="(category, indx) in item.categories" v-bind:key="indx">
                         <p class='category'>{{category}}
-                            <b-button pill size="sm" class="remove-btn" variant="secondary" @click="$bvToast.show(`${item.name}${indx}`)">
+                            <b-button pill size="sm" class="remove-btn" variant="secondary" @click="$bvToast.show(`${item._id}${indx}`)">
                                 &#10006;
                             </b-button>
-                            <b-toast v-bind:id="`${item.name}${indx}`" title="Удалить?" static no-auto-hide no-close-button>
+                            <b-toast v-bind:id="`${item._id}${indx}`" title="Удалить?" static no-auto-hide no-close-button>
                                 <div class="toast-body-flex">
-                                    <b-button size="sm" variant="outline-success" @click="">&#10004;</b-button>
-                                    <b-button size="sm" variant="outline-dark" @click="$bvToast.hide(`${item.name}${indx}`)">&#10008;</b-button>
+                                    <b-button size="sm" variant="outline-success" @click="deleteCategory(item._id,category);$bvToast.hide(`${item._id}${indx}`)">&#10004;</b-button>
+                                    <b-button size="sm" variant="outline-dark" @click="$bvToast.hide(`${item._id}${indx}`)">&#10008;</b-button>
                                 </div>
                             </b-toast>
                         </p>
                     </div>
-                    <b-button size="sm" class="w-100" variant="secondary" @click="$bvToast.show(`addCategoryFor${item.name}`)">
+                    <b-button size="sm" class="w-100" variant="secondary" @click="$bvToast.show(`addCategoryFor${item._id}`)">
                         Добавить
                     </b-button>
-                    <b-toast v-bind:id="`addCategoryFor${item.name}`" title="Выберите категорию" static no-auto-hide>
+                    <b-toast v-bind:id="`addCategoryFor${item._id}`" title="Выберите категорию" static no-auto-hide>
                         <div class="toast-body-column">
                             <b-form-select v-model="selected" :options="options" size="sm"></b-form-select>
-                            <b-button size="sm" variant="outline-success" class="mt-2" @click="">Сохранить</b-button>
+                            <b-button size="sm" variant="outline-success" class="mt-2" @click="addCategory(item._id);$bvToast.hide(`addCategoryFor${item._id}`)">Сохранить</b-button>
                         </div>
                     </b-toast>
                 </template>
@@ -128,6 +128,16 @@ export default {
                     }
                 })
             })
+        },
+        addCategory(id) {
+          axios.put(`${baseUrl}/api/channels`,{id,category:this.selected,type:'add'})
+            this.selected=null
+            this.fetch()
+        },
+        deleteCategory(id, category) {
+          axios.put(`${baseUrl}/api/channels`,{id,category,type:'delete'})
+          this.fetch()
+            
         }
     }
 }

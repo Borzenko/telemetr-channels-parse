@@ -1,3 +1,6 @@
+const db = require('./db')
+const ObjectId = require('mongodb').ObjectId
+
 module.exports = {
     //Proxy helper
 
@@ -35,7 +38,23 @@ module.exports = {
             user: "EPjErwx9M0",
             password: "borovenko1996"
         }
-        return "http://" + proxy.user + ":" + proxy.password + "@" + hosts[getRandomNumber(0, hosts.length-1)] + ":" + proxy.port
+        return "http://" + proxy.user + ":" + proxy.password + "@" + hosts[getRandomNumber(0, hosts.length - 1)] + ":" + proxy.port
+    },
+
+    //services helper
+    async updateChannelCategory(data) {
+        const channelsCollection = await db.collection('channels')
+       if (data.type === 'add') {
+           console.log(data)
+            await channelsCollection.update({ '_id': ObjectId(data.id) }, { '$push': { 'categories': data.category } })
+        }else{
+            console.log(data)
+            console.log('delete')
+            await channelsCollection.update({ '_id': ObjectId(data.id) }, { '$pull': { 'categories': data.category } })
+        }
+
+        const channel = await channelsCollection.findOne({ '_id': ObjectId(data.id) })
+        console.log(channel)
     }
 
 }
