@@ -32,4 +32,10 @@ router.get('/channels', async (req, res, next) => {
   })
 });
 
+router.get('/categories', async (req, res) => {
+  const catCollection = await db.collection('categories')
+  let categ = await catCollection.findOne({})
+  return res.json(categ.categories)
+})
+
 module.exports = router;

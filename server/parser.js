@@ -32,7 +32,7 @@ function startInterval(seconds, callback) {
 /**
  * @param {Cheerio} row
  * */
-function parseInfo(row , parseCategories, isFirst) {
+function parseInfo(row, parseCategories, isFirst) {
   let result = {}
 
   let columns = row.find('td')
@@ -48,7 +48,7 @@ function parseInfo(row , parseCategories, isFirst) {
   let nameRoot = columns.eq(1)
   let name = nameRoot.find('a').first().text()
   result['name'] = name
-  if(isFirst) {
+  if (isFirst) {
     console.log(name)
   }
 
@@ -121,7 +121,7 @@ const updateChannelEntity = async (info) => {
         prev: res
       })
     }
-    return 
+    return
   }
   return channels.insert({
     channel_id: info.channel_id,
@@ -142,7 +142,7 @@ const parseTelemetrPage = (htmlPage, isParseNew) => {
   let columns = $('#channels_table').find('tbody').find('tr')
 
   for (let infoIdx = 0, categoryIndex = 1; infoIdx < columns.length; categoryIndex += 2, infoIdx += 2) {
-    const data = parseInfo(columns.eq(infoIdx),parseCategories(columns.eq(categoryIndex)), infoIdx === 0)
+    const data = parseInfo(columns.eq(infoIdx), parseCategories(columns.eq(categoryIndex)), infoIdx === 0)
     if (data.subscribers) {
       info = data
       if (isParseNew) {
@@ -172,14 +172,14 @@ const parseInitial = async () => {
         'User-Agent': ua,
       }
     })
-    .then(html => parseTelemetrPage(html))
-    .then((info) => { 
-      if (info.subscribers === subs) {
-        subs = info.subscribers - 1
-      } else {
-        subs = info.subscribers
-      }
-    })
+      .then(html => parseTelemetrPage(html))
+      .then((info) => {
+        if (info.subscribers === subs) {
+          subs = info.subscribers - 1
+        } else {
+          subs = info.subscribers
+        }
+      })
 
   })
 }
@@ -201,26 +201,39 @@ const parseNew = async () => {
     // ?page=${page}&participants_from=1000
     const ua = fakeUa()
     const proxy = helper.proxyUrl()
-    
+
     request.get(pageUrl, {
       proxy: proxy,
       headers: {
         'User-Agent': ua,
       }
     })
-    .then(html => parseTelemetrPage(html, true))
-    .then((info) => { 
-      if (info.subscribers === subs) {
-        subs = info.subscribers - 1
-      } else {
-        subs = info.subscribers
-      }
-    })
+      .then(html => parseTelemetrPage(html, true))
+      .then((info) => {
+        if (info.subscribers === subs) {
+          subs = info.subscribers - 1
+        } else {
+          subs = info.subscribers
+        }
+      })
 
+  })
+}
+
+const parseCategory = async () => {
+  await request.get('https://telemetr.me/channels/#').then(async res => {
+    const $ = cheerio.load(res);
+    let data = []
+    await $('.cats_long div span').each((i, elem) => {
+      data.push($(elem).find('a').text())
+    })
+    const catCollection = await db.collection('categories')
+    catCollection.replaceOne({}, { categories: data }, { upsert: true })
   })
 }
 
 module.exports = {
   parseInitial,
-  parseNew
+  parseNew,
+  parseCategory
 }

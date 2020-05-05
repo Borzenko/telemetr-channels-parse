@@ -1,8 +1,10 @@
 var createError = require('http-errors');
 var express = require('express');
 const cors = require('cors')
+const parser = require('./parser')
 
 var indexRouter = require('./routes/index');
+const categoriesRouter  = require('./routes/categories');
 
 var app = express();
 
@@ -11,6 +13,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors())
 
 app.use('/api/', indexRouter);
+app.use('/api/', categoriesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -30,6 +33,7 @@ app.use(function(err, req, res, next) {
 
 app.listen(3000, async () => {
   console.log('Server is working in 3000')
+  parser.parseCategory()
 })
 
 module.exports = app;
