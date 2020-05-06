@@ -1,7 +1,7 @@
 <template>
 <div id="app">
-    <MultiFilter :options="options" :filterChannels="filterChannels"></MultiFilter>
-    <p>{{filterItems}}</p>
+    <!-- <MultiFilter :options="options" :filterChannels="filterChannels"></MultiFilter>
+    <p>{{filterItems}}</p> -->
     <b-container fluid>
         <div>
             <b-table striped hover :fields="fields" :items="items">
@@ -15,12 +15,18 @@
                     {{ parseDate(data.item.created_at )}}
                 </template>
                 <template v-slot:cell(name)="{ item }">
-                    <p style="text-decoration: line-through;" v-if="item.prev"> {{ item.prev.name }}</p>
-                    {{ item.name }}
+                    <div style="max-width: 300px; margin: 0 auto; overflow: scroll">
+                        <p style="text-decoration: line-through;" v-if="item.prev"> {{ item.prev.name }}</p>
+                        {{ item.name }}
+                    </div>
                 </template>
                 <template v-slot:cell(categories)="{ item }">
-                    <div v-for="(category, indx) in item.categories" v-bind:key="indx">
-                        <p class='category'>{{category}}
+                    <template v-for="(category, indx) in item.categories">
+                        <span class="category" v-bind:key="indx">{{ category }}
+                            <b-icon-trash class="remove-category" @click="deleteCategory(item._id,category)"></b-icon-trash>
+                            <template v-if="indx < item.categories.length - 1">, </template>
+                        </span>
+                        <!-- <p class='category'>{{category}}
                             <b-button pill size="sm" class="remove-btn" variant="secondary" @click="$bvToast.show(`${item._id}${indx}`)">
                                 &#10006;
                             </b-button>
@@ -30,11 +36,9 @@
                                     <b-button size="sm" variant="outline-dark" @click="$bvToast.hide(`${item._id}${indx}`)">&#10008;</b-button>
                                 </div>
                             </b-toast>
-                        </p>
-                    </div>
-                    <b-button size="sm" class="w-100" variant="secondary" @click="$bvToast.show(`addCategoryFor${item._id}`)">
-                        Добавить
-                    </b-button>
+                        </p> -->
+                    </template>
+                    <b-icon-plus @click="$bvToast.show(`addCategoryFor${item._id}`)"></b-icon-plus>
                     <b-toast v-bind:id="`addCategoryFor${item._id}`" title="Выберите категорию" static no-auto-hide>
                         <div class="toast-body-column">
                             <b-form-select v-model="selected" :options="options" size="sm"></b-form-select>
@@ -56,19 +60,16 @@
 <script>
 import axios from 'axios'
 import moment from 'moment'
-import MultiFilter from './components/MultiFilter.vue'
 
 const baseUrl = process.env.VUE_APP_BACKEND_URL || 'http://localhost:3000'
 
 export default {
     name: 'App',
     components: {
-        MultiFilter
     },
     data() {
         return {
             fields: [
-                'index',
                 {
                     label: 'Ссылка',
                     key: 'last_invite_link'
@@ -77,13 +78,14 @@ export default {
                     key: 'avatar_link'
                 }, {
                     label: 'Название канала',
-                    key: 'name'
+                    key: 'name',
+                    thStyle: { maxWidth: '300px'}
                 }, {
                     label: 'Описание',
                     key: 'description'
                 }, {
                     label: 'Категории',
-                    key: 'categories'
+                    key: 'categories',
                 }, {
                     label: 'Время создания',
                     key: 'created_at'
@@ -105,7 +107,7 @@ export default {
     },
     mounted() {
         this.fetch(),
-            this.fetchCategories()
+        this.fetchCategories()
     },
     methods: {
         fetch() {
@@ -136,8 +138,8 @@ export default {
                 })
             })
         },
-        addCategory(id) {
-            axios.put(`${baseUrl}/api/channels`, {
+        async addCategory(id) {
+            await axios.put(`${baseUrl}/api/channels`, {
                 id,
                 category: this.selected,
                 type: 'add'
@@ -145,8 +147,8 @@ export default {
             this.selected = null
             this.fetch()
         },
-        deleteCategory(id, category) {
-            axios.put(`${baseUrl}/api/channels`, {
+        async deleteCategory(id, category) {
+            await axios.put(`${baseUrl}/api/channels`, {
                 id,
                 category,
                 type: 'delete'
@@ -182,20 +184,32 @@ export default {
 }
 
 .category {
-    border: 1px solid #ffb822;
-    padding: 2px 25px;
-    border-radius: 5px;
     position: relative;
 }
 
-.category span {}
-
-.remove-btn {
+.remove-category {
+    display: none !important;
     position: absolute;
-    top: -10px;
-    right: -12px;
+    top: -1px;
+    right: 1px;
+    font-size: 22px;
     cursor: pointer;
+    background: white;
+    border: 1px solid;
+    border-radius: 50%;
+    padding: 3px 3px;
 }
+
+.category:hover .remove-category {
+    display: inline-block !important;
+}
+
+.category span {
+}
+/* 
+.remove-btn {
+    
+} */
 
 .b-toast .toast {
     margin: 5px 0;

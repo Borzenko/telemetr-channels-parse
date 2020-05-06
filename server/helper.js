@@ -45,16 +45,13 @@ module.exports = {
     async updateChannelCategory(data) {
         const channelsCollection = await db.collection('channels')
        if (data.type === 'add') {
-           console.log(data)
             await channelsCollection.update({ '_id': ObjectId(data.id) }, { '$push': { 'categories': data.category } })
         }else{
-            console.log(data)
-            console.log('delete')
             await channelsCollection.update({ '_id': ObjectId(data.id) }, { '$pull': { 'categories': data.category } })
         }
 
         const channel = await channelsCollection.findOne({ '_id': ObjectId(data.id) })
-        console.log(channel)
+        return channel
     }
 
 }

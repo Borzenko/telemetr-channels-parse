@@ -34,7 +34,8 @@ router.get('/channels', async (req, res, next) => {
   })
 });
 router.put('/channels', async (req, res) => {
-  helper.updateChannelCategory(req.body)
+  const channel = await helper.updateChannelCategory(req.body)
+  res.json(channel)
 })
 
 module.exports = router;
