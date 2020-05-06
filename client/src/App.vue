@@ -1,5 +1,7 @@
 <template>
 <div id="app">
+    <MultiFilter :options="options" :filterChannels="filterChannels"></MultiFilter>
+    <p>{{filterItems}}</p>
     <b-container fluid>
         <div>
             <b-table striped hover :fields="fields" :items="items">
@@ -54,11 +56,15 @@
 <script>
 import axios from 'axios'
 import moment from 'moment'
+import MultiFilter from './components/MultiFilter.vue'
 
 const baseUrl = process.env.VUE_APP_BACKEND_URL || 'http://localhost:3000'
 
 export default {
     name: 'App',
+    components: {
+        MultiFilter
+    },
     data() {
         return {
             fields: [
@@ -91,9 +97,10 @@ export default {
             ],
             page: 1,
             items: [],
+            filterItems: [],
             total: 0,
             options: [],
-            selected: null,
+            selected: null
         }
     },
     mounted() {
@@ -130,14 +137,35 @@ export default {
             })
         },
         addCategory(id) {
-          axios.put(`${baseUrl}/api/channels`,{id,category:this.selected,type:'add'})
-            this.selected=null
+            axios.put(`${baseUrl}/api/channels`, {
+                id,
+                category: this.selected,
+                type: 'add'
+            })
+            this.selected = null
             this.fetch()
         },
         deleteCategory(id, category) {
-          axios.put(`${baseUrl}/api/channels`,{id,category,type:'delete'})
-          this.fetch()
-            
+            axios.put(`${baseUrl}/api/channels`, {
+                id,
+                category,
+                type: 'delete'
+            })
+            this.fetch()
+
+        },
+        filterChannels(arr) {
+            this.filterItems = this.items.filter(item => {
+                if (item.categories) {
+                    const test = item.categories.map(cat => {
+                        const indx = arr.find(elem=>elem===cat)
+                        if (indx.length>0) {
+                            return indx
+                        }
+                    })
+                    console.log(test)
+                }
+            })
         }
     }
 }
