@@ -20,6 +20,11 @@
                         {{ item.name }}
                     </div>
                 </template>
+                <template v-slot:cell(description)="{ item }">
+                    <div style="max-width: 300px; margin: 0 auto; overflow: scroll">
+                        {{ item.description }}
+                    </div>
+                </template>
                 <template v-slot:cell(categories)="{ item }">
                     <template v-for="(category, indx) in item.categories">
                         <span class="category" v-bind:key="indx">{{ category }}

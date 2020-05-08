@@ -3,7 +3,7 @@ const axios = require('axios')
 const cheerio = require('cheerio');
 const db = require('./db')
 const htmlToText = require('html-to-text');
-const blackList = require('./black-list');
+const categorizer = require('./categorizer');
 const helper = require('./helper')
 const fakeUa = require('fake-useragent');
 
@@ -70,8 +70,7 @@ function parseInfo(row, parseCategories, isFirst) {
   // Description
   let descRoot = columns.eq(9)
   let descHtml = descRoot.find('div').first().html()
-  let descText = htmlToText.fromString(descHtml, { wordwrap: null })
-  result["description"] = descText
+  result["description"] = columns.eq(11).text().trim()
 
   result["categories"] = parseCategories
 
@@ -135,6 +134,19 @@ const updateChannelEntity = async (info) => {
   })
 }
 
+const categorize = (data) => {
+  const categories = []
+  for (let key in categorizer) {
+    const arrayWords = categorizer[key]
+    const findInDescr = arrayWords.find(item => data.description.toLowerCase().includes(item.toLowerCase()))
+    const findInName = arrayWords.find(item => data.name.toLowerCase().includes(item.toLowerCase()))
+    if (findInDescr || findInName) {
+      categories.push(key)
+    }
+  }
+  return categories;
+}
+
 // $('#channels_table').find('tbody').find('tr').first().find('td')
 const parseTelemetrPage = (htmlPage, isParseNew) => {
   let info;
@@ -143,8 +155,11 @@ const parseTelemetrPage = (htmlPage, isParseNew) => {
 
   for (let infoIdx = 0, categoryIndex = 1; infoIdx < columns.length; categoryIndex += 2, infoIdx += 2) {
     const data = parseInfo(columns.eq(infoIdx), parseCategories(columns.eq(categoryIndex)), infoIdx === 0)
+    const categories = categorize(data)
     if (data.subscribers) {
       info = data
+      const totalCategories = new Set([...categories, ...data.categories])
+      info.categories = [...totalCategories]
       if (isParseNew) {
         updateChannelEntity(info)
       } else {
