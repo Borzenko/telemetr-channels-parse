@@ -1,5 +1,5 @@
 const { cronTask } = require('./cron')
 const parser = require('./parser')
-parser.parseNew()
+//parser.parseNew()
 console.log(cronTask)
 cronTask()
