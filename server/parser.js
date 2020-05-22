@@ -179,23 +179,27 @@ const parseInitial = async () => {
   startInterval(30, () => {
     const pageUrl = getInitialUrl(subs);
     // ?page=${page}&participants_from=1000
-    const ua = fakeUa()
-    const proxy = helper.proxyUrl()
-    const req = request.get(pageUrl, {
-      proxy: proxy,
-      headers: {
-        'User-Agent': ua,
-      }
-    })
-      .then(html => parseTelemetrPage(html))
-      .then((info) => {
-        if (info.subscribers === subs) {
-          subs = info.subscribers - 1
-        } else {
-          subs = info.subscribers
+    try {
+      const ua = fakeUa()
+      const proxy = helper.proxyUrl()
+      const req = request.get(pageUrl, {
+        proxy: proxy,
+        headers: {
+          'User-Agent': ua,
         }
       })
-
+        .then(html => parseTelemetrPage(html))
+        .then((info) => {
+          if (info.subscribers === subs) {
+            subs = info.subscribers - 1
+          } else {
+            subs = info.subscribers
+          }
+        })
+    } catch (err) {
+      const errorMsg = new Error(err).stack
+      console.log(errorMsg)
+    }
   })
 }
 
@@ -214,44 +218,50 @@ const parseNew = async () => {
     }
     const pageUrl = getUrl(subs);
     // ?page=${page}&participants_from=1000
-    const ua = fakeUa()
-    const proxy = helper.proxyUrl()
-
-    request.get(pageUrl, {
-      proxy: proxy,
-      headers: {
-        'User-Agent': ua,
-      }
-    })
-      .then(html => parseTelemetrPage(html, true))
-      .then((info) => {
-        if (info.subscribers === subs) {
-          subs = info.subscribers - 1
-        } else {
-          subs = info.subscribers
+    try{const ua = fakeUa()
+      const proxy = helper.proxyUrl()
+  
+      request.get(pageUrl, {
+        proxy: proxy,
+        headers: {
+          'User-Agent': ua,
         }
       })
-
+        .then(html => parseTelemetrPage(html, true))
+        .then((info) => {
+          if (info.subscribers === subs) {
+            subs = info.subscribers - 1
+          } else {
+            subs = info.subscribers
+          }
+        })}catch (err) {
+          const errorMsg = new Error(err).stack
+          console.log(errorMsg)
+        }
   })
 }
 
 const parseCategory = async () => {
-  const ua = fakeUa()
-  const proxy = helper.proxyUrl()
-  await request.get('https://telemetr.me/channels/#',{
-    proxy: proxy,
-      headers: {
-        'User-Agent': ua,
-      }
-  }).then(async res => {
-    const $ = cheerio.load(res);
-    let data = []
-    await $('.cats_long div span').each((i, elem) => {
-      data.push($(elem).find('a').text())
-    })
-    const catCollection = await db.collection('categories')
-    catCollection.replaceOne({}, { categories: data }, { upsert: true })
-  })
+  try{const ua = fakeUa()
+    const proxy = helper.proxyUrl()
+    await request.get('https://telemetr.me/channels/#',{
+      proxy: proxy,
+        headers: {
+          'User-Agent': ua,
+        }
+    }).then(async res => {
+      const $ = cheerio.load(res);
+      let data = []
+      await $('.cats_long div span').each((i, elem) => {
+        data.push($(elem).find('a').text())
+      })
+      const catCollection = await db.collection('categories')
+      catCollection.replaceOne({}, { categories: data }, { upsert: true })
+    })}
+    catch (err) {
+      const errorMsg = new Error(err).stack
+      console.log(errorMsg)
+    }
 }
 
 module.exports = {
