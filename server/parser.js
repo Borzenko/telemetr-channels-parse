@@ -206,16 +206,8 @@ const parseInitial = async () => {
 const parseNew = async () => {
   await db.connect()
   let subs = process.env.INITIAL_SUBS || 0
-  let check = false
 
   const interval = setInterval(() => {
-    if (subs <= 1000) {
-      if (check) {
-        return clearInterval(interval);
-      } else {
-        check = true
-      }
-    }
     const pageUrl = getUrl(subs);
     // ?page=${page}&participants_from=1000
     try{
@@ -238,10 +230,10 @@ const parseNew = async () => {
           } else {
             subs = info.subscribers
           }
-        })}catch (err) {
-          const errorMsg = new Error(err).stack
-          console.log(errorMsg)
-        }
+        })
+      } catch (err) {
+        console.log(err)
+      }
   }, 20000)
 }
 

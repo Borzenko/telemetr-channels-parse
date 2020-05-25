@@ -3,6 +3,7 @@
     <!-- <MultiFilter :options="options" :filterChannels="filterChannels"></MultiFilter>
     <p>{{filterItems}}</p> -->
     <b-container fluid>
+     
         <div>
             <b-table striped hover :fields="fields" :items="items">
                 <template v-slot:cell(last_invite_link)="data">
@@ -66,7 +67,7 @@
 import axios from 'axios'
 import moment from 'moment'
 
-const baseUrl = process.env.VUE_APP_BACKEND_URL || 'http://localhost:3000'
+const baseUrl = 'http://localhost:3000'
 
 export default {
     name: 'App',
