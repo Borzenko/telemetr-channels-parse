@@ -101,6 +101,8 @@ const writeChannelEntry = async (info) => {
 const updateChannelEntity = async (info) => {
   const channels = await db.collection('channels')
   const res = await channels.findOne({ channel_id: info.channel_id })
+  console.log('res.name',res.name)
+  console.log('info.name',info.name)
   if (res) {
     if (res.name !== info.name) {
       return channels.insert({
@@ -151,7 +153,7 @@ const parseTelemetrPage = (htmlPage, isParseNew) => {
   for (let infoIdx = 0, categoryIndex = 1; infoIdx < columns.length; categoryIndex += 2, infoIdx += 2) {
     const data = parseInfo(columns.eq(infoIdx), parseCategories(columns.eq(categoryIndex)), infoIdx === 0)
     const categories = categorize(data)
-    console.log(data)
+    //console.log(data)
     
     if (data.subscribers) {
       info = data
@@ -164,8 +166,8 @@ const parseTelemetrPage = (htmlPage, isParseNew) => {
       }
     }
   }
-if(!info.subscribers){
-  console.log('htmlPage!!!!!!!!!!!!!!!!!',htmlPage)
+if(!info){
+  console.log('htmlPage!!!!!!!!!!!!!!!!!',columns)
 }
   return info
 }
