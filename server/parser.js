@@ -152,7 +152,7 @@ const parseTelemetrPage = (htmlPage, isParseNew) => {
     const data = parseInfo(columns.eq(infoIdx), parseCategories(columns.eq(categoryIndex)), infoIdx === 0)
     const categories = categorize(data)
     console.log(data)
-    console.log('htmlPage!!!!!!!!!!!!!!!!!',htmlPage)
+    
     if (data.subscribers) {
       info = data
       const totalCategories = new Set([...categories, ...data.categories])
@@ -164,7 +164,9 @@ const parseTelemetrPage = (htmlPage, isParseNew) => {
       }
     }
   }
-
+if(!info.subscribers){
+  console.log('htmlPage!!!!!!!!!!!!!!!!!',htmlPage)
+}
   return info
 }
 
