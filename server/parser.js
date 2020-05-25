@@ -163,10 +163,6 @@ const parseTelemetrPage = (htmlPage, isParseNew) => {
         writeChannelEntry(info)
       }
     }
-if(!data.subscribers){
-  console.log('data.subscribers',data.subscribers)
-  console.log('data-info',info)
-}
   }
   return info
 }
@@ -232,7 +228,6 @@ const parseNew = async () => {
       })
         .then(html => parseTelemetrPage(html, true))
         .then((info) => {
-          console.log('info',info)
           if (info.subscribers < 1100) {
             clearInterval(interval)
           }
