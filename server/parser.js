@@ -101,8 +101,6 @@ const writeChannelEntry = async (info) => {
 const updateChannelEntity = async (info) => {
   const channels = await db.collection('channels')
   const res = await channels.findOne({ channel_id: info.channel_id })
-  console.log('res.name',res.name)
-  console.log('info.name',info.name)
   if (res) {
     if (res.name !== info.name) {
       return channels.insert({
@@ -165,10 +163,11 @@ const parseTelemetrPage = (htmlPage, isParseNew) => {
         writeChannelEntry(info)
       }
     }
-  }
-if(!info){
-  console.log('htmlPage!!!!!!!!!!!!!!!!!',columns)
+if(!data.subscribers){
+  console.log('data.subscribers',data.subscribers)
+  console.log('data-info',info)
 }
+  }
   return info
 }
 
@@ -233,6 +232,7 @@ const parseNew = async () => {
       })
         .then(html => parseTelemetrPage(html, true))
         .then((info) => {
+          console.log('info',info)
           if (info.subscribers < 1100) {
             clearInterval(interval)
           }
