@@ -182,6 +182,7 @@ const parseInitial = async () => {
         proxy: proxy,
         headers: {
           'User-Agent': ua,
+          'Connection': 'keep-alive'
         }
       })
         .then(html => parseTelemetrPage(html))
@@ -224,6 +225,7 @@ const parseNew = async () => {
         proxy: proxy,
         headers: {
           'User-Agent': ua,
+          'Connection': 'keep-alive'
         }
       })
         .then(html => parseTelemetrPage(html, true))
@@ -250,6 +252,7 @@ const parseCategory = async () => {
       proxy: proxy,
         headers: {
           'User-Agent': ua,
+          'Connection': 'keep-alive'
         }
     }).then(async res => {
       const $ = cheerio.load(res);
