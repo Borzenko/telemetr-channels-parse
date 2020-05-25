@@ -24,11 +24,6 @@ const getUrl = (subs = 0) => {
   return `https://telemetr.me/channels/?mentions_week_from=1`
 }
 
-function startInterval(seconds, callback) {
-  callback();
-  return setInterval(callback, seconds * 1000);
-}
-
 /**
  * @param {Cheerio} row
  * */
@@ -156,6 +151,7 @@ const parseTelemetrPage = (htmlPage, isParseNew) => {
   for (let infoIdx = 0, categoryIndex = 1; infoIdx < columns.length; categoryIndex += 2, infoIdx += 2) {
     const data = parseInfo(columns.eq(infoIdx), parseCategories(columns.eq(categoryIndex)), infoIdx === 0)
     const categories = categorize(data)
+    console.log(data)
     if (data.subscribers) {
       info = data
       const totalCategories = new Set([...categories, ...data.categories])
@@ -176,7 +172,7 @@ const parseInitial = async () => {
   await db.connect()
   let subs = process.env.INITIAL_SUBS || 0
 
-  startInterval(30, () => {
+  const interval = setInterval(() => {
     const pageUrl = getInitialUrl(subs);
     // ?page=${page}&participants_from=1000
     try {
@@ -190,6 +186,9 @@ const parseInitial = async () => {
       })
         .then(html => parseTelemetrPage(html))
         .then((info) => {
+          if (info.subscribers < 1100) {
+            clearInterval(interval)
+          }
           if (info.subscribers === subs) {
             subs = info.subscribers - 1
           } else {
@@ -200,7 +199,7 @@ const parseInitial = async () => {
       const errorMsg = new Error(err).stack
       console.log(errorMsg)
     }
-  })
+  }, 20000)
 }
 
 const parseNew = async () => {
@@ -208,7 +207,7 @@ const parseNew = async () => {
   let subs = process.env.INITIAL_SUBS || 0
   let check = false
 
-  const interval = startInterval(5, () => {
+  const interval = setInterval(() => {
     if (subs <= 1000) {
       if (check) {
         return clearInterval(interval);
@@ -218,9 +217,9 @@ const parseNew = async () => {
     }
     const pageUrl = getUrl(subs);
     // ?page=${page}&participants_from=1000
-    try{const ua = fakeUa()
+    try{
+      const ua = fakeUa()
       const proxy = helper.proxyUrl()
-  
       request.get(pageUrl, {
         proxy: proxy,
         headers: {
@@ -229,6 +228,9 @@ const parseNew = async () => {
       })
         .then(html => parseTelemetrPage(html, true))
         .then((info) => {
+          if (info.subscribers < 1100) {
+            clearInterval(interval)
+          }
           if (info.subscribers === subs) {
             subs = info.subscribers - 1
           } else {
@@ -238,7 +240,7 @@ const parseNew = async () => {
           const errorMsg = new Error(err).stack
           console.log(errorMsg)
         }
-  })
+  }, 20000)
 }
 
 const parseCategory = async () => {
