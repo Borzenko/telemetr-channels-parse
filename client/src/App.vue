@@ -72,7 +72,7 @@ import SelectActionType from './components/SelectActionType.vue'
 import MultiFilter from './components/MultiFilter.vue'
 import ActionType from './components/ActionType.vue'
 
-const baseUrl = 'http://localhost:3000'
+const baseUrl = process.env.VUE_APP_BACKEND_URL ||'http://localhost:3000'
 
 export default {
     name: 'App',
