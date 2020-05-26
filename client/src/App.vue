@@ -1,11 +1,13 @@
 <template>
 <div id="app">
-    <!-- <MultiFilter :options="options" :filterChannels="filterChannels"></MultiFilter>
-    <p>{{filterItems}}</p> -->
+    <MultiFilter :filterChannels="filterChannels"></MultiFilter>
     <b-container fluid>
-     
         <div>
             <b-table striped hover :fields="fields" :items="items">
+                <template v-slot:cell(select_field)="{ item }">
+                    <SelectActionType :id='item.channel_id' :actionType='item.action_type' :prevActionType='item.prev_action_type' :fetch='fetch'>
+                    </SelectActionType>
+                </template>
                 <template v-slot:cell(last_invite_link)="data">
                     <a :href="data.item.last_invite_link" target="_blank">link</a>
                 </template>
@@ -66,65 +68,73 @@
 <script>
 import axios from 'axios'
 import moment from 'moment'
+import SelectActionType from './components/SelectActionType.vue'
+import MultiFilter from './components/MultiFilter.vue'
 
 const baseUrl = 'http://localhost:3000'
 
 export default {
     name: 'App',
     components: {
+        SelectActionType,
+        MultiFilter
     },
     data() {
         return {
-            fields: [
-                {
-                    label: 'Ссылка',
-                    key: 'last_invite_link'
-                }, {
-                    label: 'Аватар',
-                    key: 'avatar_link'
-                }, {
-                    label: 'Название канала',
-                    key: 'name',
-                    thStyle: { maxWidth: '300px'}
-                }, {
-                    label: 'Описание',
-                    key: 'description'
-                }, {
-                    label: 'Категории',
-                    key: 'categories',
-                }, {
-                    label: 'Время создания',
-                    key: 'created_at'
-                }, {
-                    label: 'Тип',
-                    key: 'type'
-                }, {
-                    label: 'Кол-о подписчиков',
-                    key: 'subscribers'
+            fields: [{
+                label: 'Выбрать статус',
+                key: 'select_field'
+            }, {
+                label: 'Ссылка',
+                key: 'last_invite_link'
+            }, {
+                label: 'Аватар',
+                key: 'avatar_link'
+            }, {
+                label: 'Название канала',
+                key: 'name',
+                thStyle: {
+                    maxWidth: '300px'
                 }
-            ],
+            }, {
+                label: 'Описание',
+                key: 'description'
+            }, {
+                label: 'Категории',
+                key: 'categories',
+            }, {
+                label: 'Время создания',
+                key: 'created_at'
+            }, {
+                label: 'Тип',
+                key: 'type'
+            }, {
+                label: 'Кол-о подписчиков',
+                key: 'subscribers'
+            }],
             page: 1,
             items: [],
-            filterItems: [],
             total: 0,
             options: [],
-            selected: null
+            selected: null,
+            filter : null
         }
     },
     mounted() {
         this.fetch(),
-        this.fetchCategories()
+            this.fetchCategories()
     },
     methods: {
         fetch() {
             axios.get(`${baseUrl}/api/channels`, {
                 params: {
-                    page: this.page
+                    page: this.page,
+                    filter: this.filter
                 }
             }).then(res => {
                 this.items = res.data.results
                 this.total = res.data.total
-                console.log(this.items.filter(item => !!item.prev))
+                //console.log(this.items.filter(item => !!item.prev))
             })
         },
         parseDate(date) {
@@ -162,19 +172,11 @@ export default {
             this.fetch()
 
         },
-        filterChannels(arr) {
-            this.filterItems = this.items.filter(item => {
-                if (item.categories) {
-                    const test = item.categories.map(cat => {
-                        const indx = arr.find(elem=>elem===cat)
-                        if (indx.length>0) {
-                            return indx
-                        }
-                    })
-                    console.log(test)
-                }
-            })
-        }
+        filterChannels(data) {
+            console.log(data)
+            this.filter = data
+            this.fetch()
+        },
     }
 }
 </script>
@@ -210,8 +212,8 @@ export default {
     display: inline-block !important;
 }
 
-.category span {
-}
+.category span {}
+
 /* 
 .remove-btn {
     

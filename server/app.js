@@ -5,6 +5,7 @@ const parser = require('./parser')
 
 var indexRouter = require('./routes/index');
 const categoriesRouter  = require('./routes/categories');
+const actionType = require('./routes/actionType');
 
 var app = express();
 
@@ -14,6 +15,7 @@ app.use(cors())
 
 app.use('/api/', indexRouter);
 app.use('/api/', categoriesRouter);
+app.use('/api/', actionType);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

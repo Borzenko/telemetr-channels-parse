@@ -1,36 +1,84 @@
 <template>
-<div class='filter-wrap'>
-    <b-form-group>
-        <b-form-checkbox-group class="text-center" v-model="selected" :options="options" name="buttons-1" buttons size="sm"></b-form-checkbox-group>
-    </b-form-group>
-    <b-button  @click="filterChannels(selected)" variant="success">Фильтровать</b-button>
-    <b-button>Сброс фильтра</b-button>
-</div>
+<b-form-select @change="filterChannels(selected_filter)" v-model="selected_filter" :options="options" size="sm" class="mt-3"></b-form-select>
 </template>
 
 <script>
 export default {
     name: 'MultiFilter',
-    props: ['options', 'filterChannels'],
+    props: ['filterChannels'],
     data() {
         return {
-            selected: []
+            selected_filter: null,
+            options: [{
+                    label: 'По категориям',
+                    options: [{
+                            value: {},
+                            text: 'Все'
+                        },
+                        {
+                            value: {
+                                categories: 'Прогнозы и ставки'
+                            },
+                            text: 'Прогнозы и ставки'
+                        }, {
+                            value: {
+                                categories: {
+                                    $size: 0
+                                }
+                            },
+                            text: 'Без катеорий'
+                        }
+                    ]
+                },
+                {
+                    label: 'По статусу',
+                    options: [{
+                        value: {},
+                        text: 'Все'
+                    }, {
+                        value: {
+                            action_type: null
+                        },
+                        text: 'Не отмечен'
+                    }, {
+                        value: {
+                            action_type: 'watched'
+                        },
+                        text: 'Просмотренный'
+                    }, {
+                        value: {
+                            action_type: 'need_to_work'
+                        },
+                        text: 'Просмотренный, взять в работу'
+                    }, {
+                        value: {
+                            action_type: 'completed'
+                        },
+                        text: 'Проработанные'
+                    }]
+                }, {
+                    label: 'По типу',
+                    options: [{
+                            value: {
+                                prev: {
+                                    $exists: true
+                                }
+                            },
+                            text: 'Измененный'
+                        },
+                        {
+                            value: {
+                                prev: {
+                                    $exists: false
+                                }
+                            },
+                            text: 'Новый'
+                        },
+                    ]
+                }
+            ]
         }
     }
 }
+//{ prev: { $exists: true } }
 </script>
-
-<style>
-.filter-wrap {
-    width: 80%;
-    overflow: scroll;
-    margin: 0 auto;
-    border-radius: 5px;
-}
-.filter-wrap label{
-    display: flex;
-    align-items: center;
-    width: max-content;
-    min-width: 40px;
-}
-</style>
