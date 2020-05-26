@@ -10,7 +10,7 @@
 import axios from 'axios'
 import ActionType from './ActionType.vue'
 
-const baseUrl = 'http://localhost:3000'
+const baseUrl = process.env.VUE_APP_BACKEND_URL || 'http://localhost:3000'
 
 export default {
     name: 'SelectActionType',
