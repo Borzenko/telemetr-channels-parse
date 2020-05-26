@@ -55,7 +55,7 @@
                     </b-toast>
                 </template>
                 <template v-slot:cell(type)="{ item }">
-                    <span v-if="item.prev">Измененный</span>
+                    <span v-if="item.prev">Измененный<ActionType :actionType='item.action_type'></ActionType></span>
                     <span v-else>Новый</span>
                 </template>
             </b-table>
@@ -70,6 +70,7 @@ import axios from 'axios'
 import moment from 'moment'
 import SelectActionType from './components/SelectActionType.vue'
 import MultiFilter from './components/MultiFilter.vue'
+import ActionType from './components/ActionType.vue'
 
 const baseUrl = 'http://localhost:3000'
 
@@ -77,7 +78,8 @@ export default {
     name: 'App',
     components: {
         SelectActionType,
-        MultiFilter
+        MultiFilter,
+        ActionType
     },
     data() {
         return {

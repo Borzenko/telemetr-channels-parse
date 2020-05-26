@@ -1,16 +1,23 @@
 <template>
-
-<b-form-select @change="onChange()" v-model="selected_action_type" :options="action_type" size="sm" class="mt-3"></b-form-select>
+<div>
+    <ActionType v-if="hideSelect" :openSelect="openSelect" :actionType='actionType'></ActionType>
+    <b-form-select v-if="!hideSelect" @change="onChange()" v-model="selected_action_type" :options="action_type" size="sm"></b-form-select>
+    <b-button @click="openSelect(false)" v-if="hideSelect&&!actionType" variant="light">Добавить статус</b-button>
+</div>
 </template>
-<script>
 
+<script>
 import axios from 'axios'
+import ActionType from './ActionType.vue'
 
 const baseUrl = 'http://localhost:3000'
 
 export default {
     name: 'SelectActionType',
-    props: ['id','actionType','fetch', 'prevActionType'],
+    props: ['id', 'actionType', 'fetch', 'prevActionType'],
+    components: {
+        ActionType
+    },
     data() {
         return {
             selected_action_type: this.actionType || null,
@@ -30,16 +37,21 @@ export default {
                     value: 'completed',
                     text: 'Проработанные ',
                 }
-            ]
+            ],
+            hideSelect: true
         }
     },
     methods: {
-        async onChange(){
+        async onChange() {
             await axios.put(`${baseUrl}/api/channels/actionType`, {
                 id: this.id,
                 action_type: this.selected_action_type
             })
+            this.hideSelect = true
             this.fetch()
+        },
+        openSelect(value) {
+            this.hideSelect = value
         }
     }
 }
