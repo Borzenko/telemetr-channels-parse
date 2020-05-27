@@ -1,17 +1,18 @@
 <template>
 <div class='filter-wrap'>
     <span class='filter-title'>Фильтр:</span>
-    <b-tabs content-class="mt-3" fill>
-        <b-tab title="По категории" active>
-            <b-form-select @change="filterChannels(selected_filter)" v-model="selected_filter" :options="options_category" size="sm" class="mt-3"></b-form-select>
-        </b-tab>
-        <b-tab title="По статусу">
-            <b-form-select @change="filterChannels(selected_filter)" v-model="selected_filter" :options="options_status" size="sm" class="mt-3"></b-form-select>
-        </b-tab>
-        <b-tab title="По типу">
-            <b-form-select @change="filterChannels(selected_filter)" v-model="selected_filter" :options="options_type" size="sm" class="mt-3"></b-form-select>
-        </b-tab>
-    </b-tabs>
+    <div class="mr-3">
+        <p class='filter-subtitle'>По категории</p>
+        <b-form-select @change="changeFilter()" v-model="categories" :options="options_category" size="sm"></b-form-select>
+    </div>
+    <div class="mr-3">
+        <p class='filter-subtitle'>По статусу</p>
+        <b-form-select @change="changeFilter()" v-model="action_type" :options="options_status" size="sm"></b-form-select>
+    </div>
+    <div>
+        <p class='filter-subtitle'>По типу</p>
+        <b-form-select @change="changeFilter()" v-model="prev" :options="options_type" size="sm"></b-form-select>
+    </div>
 </div>
 </template>
 
@@ -21,66 +22,73 @@ export default {
     props: ['filterChannels'],
     data() {
         return {
-            selected_filter: null,
+            categories: null,
+            action_type: null,
+            prev: null,
             options_category: [{
-                    value: {},
+                    value: {
+                        $exists: true
+                    },
                     text: 'Все'
                 },
                 {
-                    value: {
-                        categories: 'Прогнозы и ставки'
-                    },
+                    value: 'Прогнозы и ставки',
                     text: 'Прогнозы и ставки'
                 }, {
                     value: {
-                        categories: {
-                            $size: 0
-                        }
+                        $size: 0
                     },
                     text: 'Без катеорий'
                 }
             ],
             options_status: [{
-                value: {},
+                value: false,
                 text: 'Все'
             }, {
                 value: {
-                    action_type: null
+                    $exists: false
                 },
                 text: 'Не отмечен'
             }, {
-                value: {
-                    action_type: 'watched'
-                },
+                value: 'watched',
                 text: 'Просмотренный'
             }, {
-                value: {
-                    action_type: 'need_to_work'
-                },
+                value: 'need_to_work',
                 text: 'В работу'
             }, {
-                value: {
-                    action_type: 'completed'
-                },
+                value: 'completed',
                 text: 'Проработанные'
             }],
             options_type: [{
                     value: {
-                        prev: {
-                            $exists: true
-                        }
+                        $exists: true
                     },
                     text: 'Измененный'
                 },
                 {
                     value: {
-                        prev: {
-                            $exists: false
-                        }
+                        $exists: false
                     },
                     text: 'Новый'
                 },
             ]
+        }
+    },
+    methods: {
+        changeFilter() {
+            let data = {}
+            if (this.categories) {
+                data.categories = this.categories
+            }
+            if (this.action_type) {
+                data.action_type = this.action_type
+            }
+            if (this.prev) {
+                data.prev = this.prev
+            }
+
+            console.log(data)
+            this.filterChannels(data)
         }
     }
 }
@@ -97,5 +105,10 @@ export default {
 .filter-title {
     margin-right: 20px;
     font-weight: bold;
+}
+
+.filter-subtitle{
+    font-size: 12px;
+    margin: 5px 0;
 }
 </style>
