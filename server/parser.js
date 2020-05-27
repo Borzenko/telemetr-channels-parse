@@ -43,9 +43,9 @@ function parseInfo(row, parseCategories, isFirst) {
   let nameRoot = columns.eq(1)
   let name = nameRoot.find('a').first().text()
   result['name'] = name
-  if (isFirst) {
-    console.log(name)
-  }
+  // if (isFirst) {
+  //   console.log(name)
+  // }
 
   let invite_link = nameRoot.find('a').first().attr('href')
   result['last_invite_link'] = invite_link
@@ -101,20 +101,22 @@ const writeChannelEntry = async (info) => {
 const updateChannelEntity = async (info) => {
   const channels = await db.collection('channels')
   const res = await channels.findOne({ channel_id: info.channel_id })
-  if (res) {
-    if (res.name !== info.name) {
-      return channels.insert({
-        channel_id: info.channel_id,
-        avatar_link: info.avatar_link,
-        name: info.name,
-        subscribers: info.subscribers,
-        description: info.description,
-        last_invite_link: info.last_invite_link,
-        created_at: new Date(),
-        categories: info.categories,
-        prev: res
-      })
-    }
+  const resPrev = await channels.findOne({ channel_id: info.channel_id, name: info.name })
+  
+  if (res && !resPrev) {
+    console.log('info.name',info.name)
+    return channels.insert({
+      channel_id: info.channel_id,
+      avatar_link: info.avatar_link,
+      name: info.name,
+      subscribers: info.subscribers,
+      description: info.description,
+      last_invite_link: info.last_invite_link,
+      created_at: new Date(),
+      categories: info.categories,
+      prev: res
+    })
+  } else if (resPrev) {
     return
   }
   return channels.insert({
@@ -151,8 +153,7 @@ const parseTelemetrPage = (htmlPage, isParseNew) => {
   for (let infoIdx = 0, categoryIndex = 1; infoIdx < columns.length; categoryIndex += 2, infoIdx += 2) {
     const data = parseInfo(columns.eq(infoIdx), parseCategories(columns.eq(categoryIndex)), infoIdx === 0)
     const categories = categorize(data)
-    //console.log(data)
-    
+
     if (data.subscribers) {
       info = data
       const totalCategories = new Set([...categories, ...data.categories])
@@ -210,7 +211,7 @@ const parseNew = async () => {
   const interval = setInterval(() => {
     const pageUrl = getUrl(subs);
     // ?page=${page}&participants_from=1000
-    try{
+    try {
       const ua = fakeUa()
       const proxy = helper.proxyUrl()
       request.get(pageUrl, {
@@ -231,21 +232,22 @@ const parseNew = async () => {
             subs = info.subscribers
           }
         })
-      } catch (err) {
-        console.log(err)
-      }
+    } catch (err) {
+      console.log(err)
+    }
   }, 20000)
 }
 
 const parseCategory = async () => {
-  try{const ua = fakeUa()
+  try {
+    const ua = fakeUa()
     const proxy = helper.proxyUrl()
-    await request.get('https://telemetr.me/channels/#',{
+    await request.get('https://telemetr.me/channels/#', {
       proxy: proxy,
-        headers: {
-          'User-Agent': ua,
-          'Connection': 'keep-alive'
-        }
+      headers: {
+        'User-Agent': ua,
+        'Connection': 'keep-alive'
+      }
     }).then(async res => {
       const $ = cheerio.load(res);
       let data = []
@@ -254,11 +256,12 @@ const parseCategory = async () => {
       })
       const catCollection = await db.collection('categories')
       catCollection.replaceOne({}, { categories: data }, { upsert: true })
-    })}
-    catch (err) {
-      const errorMsg = new Error(err).stack
-      console.log(errorMsg)
-    }
+    })
+  }
+  catch (err) {
+    const errorMsg = new Error(err).stack
+    console.log(errorMsg)
+  }
 }
 
 module.exports = {

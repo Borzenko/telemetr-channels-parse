@@ -4,10 +4,6 @@
     <b-container fluid>
         <div>
             <b-table striped hover :fields="fields" :items="items">
-                <template v-slot:cell(select_field)="{ item }">
-                    <SelectActionType :id='item.channel_id' :actionType='item.action_type' :prevActionType='item.prev_action_type' :fetch='fetch'>
-                    </SelectActionType>
-                </template>
                 <template v-slot:cell(last_invite_link)="data">
                     <a :href="data.item.last_invite_link" target="_blank">link</a>
                 </template>
@@ -58,6 +54,10 @@
                     <span v-if="item.prev">Измененный<ActionType :actionType='item.action_type'></ActionType></span>
                     <span v-else>Новый</span>
                 </template>
+                <template v-slot:cell(select_field)="{ item }">
+                    <SelectActionType :id='item.channel_id' :actionType='item.action_type' :prevActionType='item.prev_action_type' :fetch='fetch'>
+                    </SelectActionType>
+                </template>
             </b-table>
             <b-pagination class="mt-3" v-model="page" :total-rows="total" :per-page="50" @change="handlePaginationUpdate" aria-controls="my-table"></b-pagination>
         </div>
@@ -84,9 +84,6 @@ export default {
     data() {
         return {
             fields: [{
-                label: 'Выбрать статус',
-                key: 'select_field'
-            }, {
                 label: 'Ссылка',
                 key: 'last_invite_link'
             }, {
@@ -113,6 +110,9 @@ export default {
             }, {
                 label: 'Кол-о подписчиков',
                 key: 'subscribers'
+            },{
+                label: 'Выбрать статус',
+                key: 'select_field'
             }],
             page: 1,
             items: [],

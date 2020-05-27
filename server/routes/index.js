@@ -23,13 +23,8 @@ router.get('/channels', async (req, res, next) => {
     .skip(page > 0 ? ((page - 1) * perPage) : 0 )
     .limit(50)
     .toArray()
-  const total = await channelsCollection.find({
-    $or: [{
-      categories: { $elemMatch: { $eq: "Прогнозы и ставки" } }
-    }, {
-      categories: { $size: 0 }
-    }]
-  }).count()
+  const total = await channelsCollection.find(filter)
+  .count()
   res.json({
     results: items,
     total

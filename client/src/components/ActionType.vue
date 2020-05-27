@@ -11,7 +11,7 @@ export default {
         return {
             action: {
                 watched: 'Просмотренный',
-                need_to_work: 'Просмотренный, взять в работу',
+                need_to_work: 'В работу',
                 completed: 'Проработанные'
             }
         }

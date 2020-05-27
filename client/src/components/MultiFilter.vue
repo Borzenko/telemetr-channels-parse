@@ -57,7 +57,7 @@ export default {
                 value: {
                     action_type: 'need_to_work'
                 },
-                text: 'Просмотренный, взять в работу'
+                text: 'В работу'
             }, {
                 value: {
                     action_type: 'completed'

@@ -31,7 +31,7 @@ export default {
                 },
                 {
                     value: 'need_to_work',
-                    text: 'Просмотренный, взять в работу'
+                    text: 'В работу'
                 },
                 {
                     value: 'completed',
