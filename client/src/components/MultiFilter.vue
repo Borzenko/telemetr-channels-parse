@@ -22,53 +22,85 @@ export default {
     props: ['filterChannels'],
     data() {
         return {
-            categories: null,
+            categories: [{
+                categories: {
+                    $elemMatch: {
+                        $eq: "Прогнозы и ставки"
+                    }
+                }
+            }, {
+                categories: {
+                    $size: 0
+                }
+            }],
             action_type: null,
             prev: null,
             options_category: [{
-                    value: {
-                        $exists: true
-                    },
+                    value: [{
+                        categories: {
+                            $elemMatch: {
+                                $eq: "Прогнозы и ставки"
+                            }
+                        }
+                    }, {
+                        categories: {
+                            $size: 0
+                        }
+                    }],
                     text: 'Все'
                 },
                 {
-                    value: 'Прогнозы и ставки',
+                    value: [{
+                        categories: {
+                            $elemMatch: {
+                                $eq: "Прогнозы и ставки"
+                            }
+                        }
+                    }],
                     text: 'Прогнозы и ставки'
                 }, {
-                    value: {
-                        $size: 0
-                    },
+                    value: [{
+                        categories: {
+                            $size: 0
+                        }
+                    }],
                     text: 'Без катеорий'
                 }
             ],
+
             options_status: [{
-                value: false,
+                value: null,
                 text: 'Все'
             }, {
-                value: {
-                    $exists: false
-                },
+                value: [{
+                    action_type: {
+                        $exists: false
+                    }
+                }],
                 text: 'Не отмечен'
             }, {
-                value: 'watched',
+                value:[{action_type:'watched'}] ,
                 text: 'Просмотренный'
             }, {
-                value: 'need_to_work',
+                value:[{action_type:'need_to_work'}],
                 text: 'В работу'
             }, {
-                value: 'completed',
+                value: [{action_type:'completed'}],
                 text: 'Проработанные'
             }],
             options_type: [{
-                    value: {
+                    value: null,
+                    text: 'Все'
+                }, {
+                    value: [{prev:{
                         $exists: true
-                    },
+                    }}],
                     text: 'Измененный'
                 },
                 {
-                    value: {
+                    value: [{prev:{
                         $exists: false
-                    },
+                    }}],
                     text: 'Новый'
                 },
             ]
@@ -76,15 +108,23 @@ export default {
     },
     methods: {
         changeFilter() {
-            let data = {}
+            let data = {
+                $and: []
+            }
             if (this.categories) {
-                data.categories = this.categories
+                data.$and.push({
+                    $or: this.categories
+                })
             }
             if (this.action_type) {
-                data.action_type = this.action_type
+                data.$and.push({
+                    $or: this.action_type
+                })
             }
             if (this.prev) {
-                data.prev = this.prev
+                data.$and.push({
+                    $or: this.prev
+                })
             }
 
             console.log(data)
@@ -98,7 +138,7 @@ export default {
 .filter-wrap {
     display: flex;
     width: 50%;
-    margin: 20px auto;
+    margin: 20px 0 20px 20px;
     align-items: center;
 }
 
@@ -107,7 +147,7 @@ export default {
     font-weight: bold;
 }
 
-.filter-subtitle{
+.filter-subtitle {
     font-size: 12px;
     margin: 5px 0;
 }
