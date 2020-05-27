@@ -52,14 +52,42 @@ module.exports = {
     //services helper
     async updateChannelCategory(data) {
         const channelsCollection = await db.collection('channels')
-       if (data.type === 'add') {
+        if (data.type === 'add') {
             await channelsCollection.update({ '_id': ObjectId(data.id) }, { '$push': { 'categories': data.category } })
-        }else{
+        } else {
             await channelsCollection.update({ '_id': ObjectId(data.id) }, { '$pull': { 'categories': data.category } })
         }
 
         const channel = await channelsCollection.findOne({ '_id': ObjectId(data.id) })
         return channel
+    },
+
+
+    async clearCollection() {
+        const channelsCollection = await db.collection('channels')
+        const channels = channelsCollection.aggregate(
+            [
+                {
+                    $group: {
+                        _id: { channel_id: "$channel_id" },
+                        uniqueIds: { $addToSet: "$_id" },
+                        count: { $sum: 1 }
+
+                    }
+                },
+                {
+                    $match: {
+                        count: { "$gt": 1 }
+                    }
+                }
+            ]
+        )
+        console.log(channels)
+
+        //const idsToDelete = findDuplicatedIdsToRemove(channels)
+
+        //db.collections().remove({ id: { $in: idsToDelete } })
+
     }
 
 }
