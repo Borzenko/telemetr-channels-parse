@@ -65,28 +65,32 @@ module.exports = {
 
     async clearCollection() {
         const channelsCollection = await db.collection('channels')
-        const channels = channelsCollection.aggregate(
-            [
-                {
-                    $group: {
-                        _id: { channel_id: "$channel_id" },
-                        uniqueIds: { $addToSet: "$_id" },
-                        count: { $sum: 1 }
-
-                    }
-                },
-                {
-                    $match: {
-                        count: { "$gt": 1 }
-                    }
+        const channels = await channelsCollection.aggregate([
+            {
+                $group: {
+                    _id: { channel_id: "$name" },
+                    uniqueName: { $addToSet: "$_id" },
+                    count: { $sum: 1 }
                 }
-            ]
-        )
+            },
+            {
+                $match: {
+                    count: { "$gt": 1 }
+                }
+            }
+        ]
+        ).toArray()
+        let idsForRemove = []
+        for (let item of channels) {
+            const duplicatedIds = await item.uniqueName.forEach((item, index) => {
+                if (index !== 0) {
+                    idsForRemove.push(ObjectId(item))
+                }
+            })
+        }
         console.log(channels)
 
-        //const idsToDelete = findDuplicatedIdsToRemove(channels)
-
-        //db.collections().remove({ id: { $in: idsToDelete } })
+        await channelsCollection.remove({ '_id': { $in: idsForRemove } })
 
     }
 
